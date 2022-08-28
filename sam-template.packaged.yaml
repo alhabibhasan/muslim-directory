@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Serverless Express Application/API powered by API Gateway and Lambda
+Parameters:
+  DomainName:
+    Type: String
+    Description: API Domain name
+    Default: ''
+Resources:
+  ExpressApi:
+    Type: AWS::Serverless::HttpApi
+  ExpressLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://muslim-directory-project-bucket/cc982e2912cd23ea1a860e202f3adc4c
+      Handler: main.handler
+      MemorySize: 1024
+      Runtime: nodejs16.x
+      Timeout: 30
+      Events:
+        ProxyApiRoot:
+          Type: HttpApi
+          Properties:
+            ApiId:
+              Ref: ExpressApi
+Outputs:
+  LambdaFunctionConsoleUrl:
+    Description: Console URL for the Lambda Function.
+    Value:
+      Fn::Sub: https://${AWS::Region}.console.aws.amazon.com/lambda/home?region=${AWS::Region}#/functions/${ExpressLambdaFunction}
+  ApiGatewayApiConsoleUrl:
+    Description: Console URL for the API Gateway API's Stage.
+    Value:
+      Fn::Sub: https://${AWS::Region}.console.aws.amazon.com/apigateway/home?region=${AWS::Region}#/apis/${ExpressApi}/stages/prod
+  ApiUrl:
+    Description: Invoke URL for your API. Clicking this link will perform a GET request
+      on the root resource of your API.
+    Value:
+      Fn::Sub: https://${ExpressApi}.execute-api.${AWS::Region}.amazonaws.com/
+  LambdaFunctionName:
+    Description: Name of the Serverless Express Lambda Function
+    Value:
+      Ref: ExpressLambdaFunction
